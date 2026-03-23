@@ -7,7 +7,7 @@
 
 .hero-panel {
   display: grid;
-  grid-template-columns: 1.9fr 1fr;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
   gap: 20px;
   padding: 28px;
   border-radius: 28px;
@@ -16,6 +16,34 @@
     linear-gradient(135deg, rgba(250, 247, 234, 0.98), rgba(255, 255, 255, 0.96));
   border: 1px solid rgba(120, 92, 39, 0.14);
   box-shadow: 0 24px 60px rgba(78, 54, 19, 0.12);
+}
+
+.hero-copy-block {
+  display: grid;
+  align-content: start;
+}
+
+.hero-side {
+  display: grid;
+  gap: 14px;
+}
+
+.sync-panel,
+.hero-stats article,
+.record-card,
+.knowledge-grid article,
+.question-card,
+.empty-card {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(120, 92, 39, 0.12);
+  box-shadow: 0 10px 28px rgba(49, 34, 11, 0.08);
+}
+
+.sync-panel {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
 }
 
 .eyebrow {
@@ -39,22 +67,77 @@
   color: #5d4c34;
 }
 
+.player-title {
+  font-size: 1.35rem;
+  color: #38250b;
+}
+
+.sync-banner {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  display: grid;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.sync-banner strong {
+  color: #38250b;
+}
+
+.sync-banner span {
+  color: #5f4d34;
+}
+
+.sync-banner.guest,
+.sync-banner.local,
+.sync-banner.connecting {
+  background: rgba(246, 239, 221, 0.9);
+}
+
+.sync-banner.synced {
+  background: rgba(223, 242, 217, 0.88);
+}
+
+.sync-banner.error {
+  background: rgba(255, 230, 223, 0.88);
+}
+
+.player-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.player-input,
+.answer-box input {
+  height: 52px;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 92, 39, 0.2);
+  padding: 0 16px;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.player-input:focus,
+.answer-box input:focus {
+  outline: 2px solid rgba(217, 107, 29, 0.3);
+  border-color: #d96b1d;
+}
+
+.inline-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.support-note {
+  color: #766449;
+}
+
 .hero-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  align-self: end;
-}
-
-.hero-stats article,
-.record-card,
-.knowledge-grid article,
-.question-card,
-.empty-card {
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(120, 92, 39, 0.12);
-  box-shadow: 0 10px 28px rgba(49, 34, 11, 0.08);
 }
 
 .hero-stats article {
@@ -121,7 +204,8 @@
   box-shadow: 0 12px 28px rgba(184, 97, 24, 0.28);
 }
 
-.semester-chip:disabled {
+.semester-chip:disabled,
+.primary-button:disabled {
   cursor: not-allowed;
   opacity: 0.52;
 }
@@ -310,20 +394,6 @@
   gap: 10px;
 }
 
-.answer-box input {
-  height: 52px;
-  border-radius: 16px;
-  border: 1px solid rgba(120, 92, 39, 0.2);
-  padding: 0 16px;
-  font: inherit;
-  background: rgba(255, 255, 255, 0.88);
-}
-
-.answer-box input:focus {
-  outline: 2px solid rgba(217, 107, 29, 0.3);
-  border-color: #d96b1d;
-}
-
 .question-actions {
   display: flex;
   gap: 12px;
@@ -373,7 +443,7 @@
 
 .semester-chip:hover:not(:disabled),
 .mode-chip:hover,
-.primary-button:hover,
+.primary-button:hover:not(:disabled),
 .secondary-button:hover,
 .option-card:hover,
 .unit-card:hover,
@@ -384,7 +454,9 @@
 }
 
 @media (max-width: 1200px) {
-  .layout-grid {
+  .layout-grid,
+  .hero-panel,
+  .player-form {
     grid-template-columns: 1fr;
   }
 
@@ -402,10 +474,6 @@
   .app-shell {
     width: min(100% - 20px, 1440px);
     margin: 12px auto 24px;
-  }
-
-  .hero-panel {
-    grid-template-columns: 1fr;
   }
 
   .hero-stats,

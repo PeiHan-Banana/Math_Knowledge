@@ -1,50 +1,78 @@
 # Math Knowledge Tool
 
-一个基于 Vite + React + TypeScript 的小学数学知识点学习工具原型。
+A Vite + React + TypeScript prototype for elementary school math knowledge-point practice.
 
-## 在线访问
+## Online Access
 
-- 公网页面：<https://peihan-banana.github.io/Math_Knowledge/>
-- 网页二维码：`public/math-knowledge-pages-qr.png`
+- Public page: <https://peihan-banana.github.io/Math_Knowledge/>
+- Page QR code: `public/math-knowledge-pages-qr.png`
 
-## 当前版本
+## Current MVP
 
-当前已实现首版 MVP：
+- Grade 3 first semester
+- 2 sample units
+- Knowledge catalog and concept cards
+- Point practice
+- Unit challenge
+- Wrong-question review
+- Weak-tag summary
+- Per-student local records
+- Firebase Realtime Database cloud sync
 
-- 三年级上册
-- 2 个单元示例内容
-- 知识点目录浏览
-- 知识卡片与解题步骤
-- 知识点练习
-- 单元闯关
-- 错题复习
-- 薄弱标签统计
-- 本地学习记录保存（localStorage）
+## Firebase Cloud Sync
 
-## 项目结构
+### Local development
 
-- `src/App.tsx`：主界面与练习逻辑
-- `src/data/mathContent.ts`：课程、知识点与题目数据
-- `src/App.css`：页面布局与视觉样式
-- `src/index.css`：全局样式与主题变量
+1. Create a Firebase Web App and enable `Realtime Database`
+2. Copy `.env.example` to `.env.local`
+3. Fill in these variables:
 
-## 本地运行
+```bash
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_DATABASE_URL=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+4. Run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-## 构建
+### GitHub Pages deployment
+
+If you want the published GitHub Pages site to use Firebase too, add the same keys in the GitHub repository Variables page:
+
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_DATABASE_URL`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+
+Path:
+`Settings` -> `Secrets and variables` -> `Actions` -> `Variables`
+
+The Pages workflow already reads those variables during build.
+
+If Firebase is not configured, the app automatically falls back to local storage.
+
+## Project Structure
+
+- `src/App.tsx`: main UI and practice flow
+- `src/data/mathContent.ts`: course and question data
+- `src/lib/learningSync.ts`: local/cloud learning record sync
+- `src/App.css`: layout and visuals
+- `src/index.css`: global theme styles
+
+## Build
 
 ```bash
 npm run build
 ```
-
-## 后续扩展方向
-
-- 补充 3-6 年级完整教材目录
-- 增加题库导入功能
-- 增加学生账号与学习计划
-- 增加家长/老师视角统计
-- 封装为桌面版离线工具

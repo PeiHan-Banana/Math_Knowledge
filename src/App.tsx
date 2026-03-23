@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import './App.css'
 import {
   courseCatalog,
@@ -7,56 +7,30 @@ import {
   type PracticeMode,
   type Question,
 } from './data/mathContent'
-
-type LearningState = {
-  answeredIds: string[]
-  correctIds: string[]
-  wrongIds: string[]
-  wrongCounts: Record<string, number>
-  pointStats: Record<string, { answered: number; correct: number; wrong: number }>
-}
+import {
+  createEmptyLearningRecord,
+  hasFirebaseSyncConfig,
+  loadLastPlayerName,
+  loadLocalLearningRecord,
+  loadRemoteLearningRecord,
+  normalizePlayerName,
+  pickLatestLearningRecord,
+  saveLastPlayerName,
+  saveLocalLearningRecord,
+  saveRemoteLearningRecord,
+  type LearningRecord,
+  type LearningState,
+} from './lib/learningSync'
 
 type SubmissionState = {
   status: 'idle' | 'correct' | 'wrong'
   explanation: string
 }
 
-const STORAGE_KEY = 'math-knowledge-tool-state'
-
-const defaultLearningState: LearningState = {
-  answeredIds: [],
-  correctIds: [],
-  wrongIds: [],
-  wrongCounts: {},
-  pointStats: {},
-}
-
-function loadLearningState() {
-  if (typeof window === 'undefined') {
-    return defaultLearningState
-  }
-
-  try {
-    const rawValue = window.localStorage.getItem(STORAGE_KEY)
-    if (!rawValue) {
-      return defaultLearningState
-    }
-
-    const parsedValue = JSON.parse(rawValue) as Partial<LearningState>
-    return {
-      answeredIds: parsedValue.answeredIds ?? [],
-      correctIds: parsedValue.correctIds ?? [],
-      wrongIds: parsedValue.wrongIds ?? [],
-      wrongCounts: parsedValue.wrongCounts ?? {},
-      pointStats: parsedValue.pointStats ?? {},
-    }
-  } catch {
-    return defaultLearningState
-  }
-}
+type SyncState = 'guest' | 'local' | 'connecting' | 'synced' | 'error'
 
 function normalizeAnswer(value: string) {
-  return value.trim().replace(/\s+/g, '').replace(/，/g, ',').toLowerCase()
+  return value.trim().replace(/\s+/g, '').replaceAll('\uFF0C', ',').toLowerCase()
 }
 
 function isQuestionCorrect(question: Question, answer: string) {
@@ -81,16 +55,69 @@ function getModeQuestionSet(unit: CourseUnit, mode: PracticeMode, learningState:
   return unit.questions
 }
 
+function getActivePlayerKey(playerName: string) {
+  return normalizePlayerName(playerName) || 'guest'
+}
+
+function getSyncMeta(syncState: SyncState, isGuestMode: boolean) {
+  if (isGuestMode) {
+    return {
+      className: 'sync-banner guest',
+      title: 'Local Trial Mode',
+      body: 'Progress stays in this browser only. Enter a student name to keep separate records.',
+    }
+  }
+
+  if (!hasFirebaseSyncConfig) {
+    return {
+      className: 'sync-banner local',
+      title: 'Local Student Mode',
+      body: 'Firebase is not configured yet. Records are still separated by student name on this device.',
+    }
+  }
+
+  if (syncState === 'connecting') {
+    return {
+      className: 'sync-banner connecting',
+      title: 'Connecting To Cloud',
+      body: 'Loading the latest learning record from Firebase.',
+    }
+  }
+
+  if (syncState === 'error') {
+    return {
+      className: 'sync-banner error',
+      title: 'Cloud Sync Failed',
+      body: 'The app fell back to local storage. Check Firebase config and database rules.',
+    }
+  }
+
+  return {
+    className: 'sync-banner synced',
+    title: 'Cloud Sync Enabled',
+    body: 'The latest record for this student can continue across different devices.',
+  }
+}
+
 function App() {
+  const initialPlayerName = loadLastPlayerName()
+  const [playerNameInput, setPlayerNameInput] = useState(initialPlayerName)
+  const [currentPlayerName, setCurrentPlayerName] = useState(initialPlayerName)
   const [selectedSemesterId, setSelectedSemesterId] = useState('grade-3-fall')
   const [selectedUnitId, setSelectedUnitId] = useState('g3-fall-unit-1')
   const [selectedPointId, setSelectedPointId] = useState('g3-fall-time-second')
   const [activeMode, setActiveMode] = useState<PracticeMode>('knowledge')
   const [questionIndex, setQuestionIndex] = useState(0)
-  const [learningState, setLearningState] = useState<LearningState>(loadLearningState)
+  const [learningRecord, setLearningRecord] = useState<LearningRecord>(() => loadLocalLearningRecord(getActivePlayerKey(initialPlayerName)))
   const [draftAnswer, setDraftAnswer] = useState('')
   const [submissionState, setSubmissionState] = useState<SubmissionState>({ status: 'idle', explanation: '' })
+  const [syncState, setSyncState] = useState<SyncState>(initialPlayerName ? (hasFirebaseSyncConfig ? 'connecting' : 'local') : 'guest')
+  const [isPlayerLoading, setIsPlayerLoading] = useState(false)
+  const persistReadyRef = useRef(false)
 
+  const activePlayerKey = getActivePlayerKey(currentPlayerName)
+  const isGuestMode = activePlayerKey === 'guest'
+  const learningState = learningRecord.learningState
   const semester = courseCatalog.find((item) => item.id === selectedSemesterId) ?? courseCatalog[0]
   const unit = semester.units.find((item) => item.id === selectedUnitId) ?? semester.units[0]
   const knowledgePoint = unit.points.find((item) => item.id === selectedPointId) ?? unit.points[0]
@@ -100,6 +127,8 @@ function App() {
   const correctCount = learningState.correctIds.length
   const wrongCount = learningState.wrongIds.length
   const accuracy = answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100)
+  const displayPlayerName = isGuestMode ? 'Guest' : currentPlayerName
+  const syncMeta = getSyncMeta(syncState, isGuestMode)
 
   const weakTagEntries = Object.entries(learningState.wrongCounts)
     .map(([questionId, count]) => {
@@ -117,14 +146,115 @@ function App() {
     .slice(0, 3)
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(learningState))
-  }, [learningState])
+    let cancelled = false
+    persistReadyRef.current = false
+    setIsPlayerLoading(true)
+    setQuestionIndex(0)
+    setDraftAnswer('')
+    setSubmissionState({ status: 'idle', explanation: '' })
+
+    const localRecord = loadLocalLearningRecord(activePlayerKey)
+    setLearningRecord(localRecord)
+
+    if (isGuestMode) {
+      setSyncState('guest')
+      setIsPlayerLoading(false)
+      persistReadyRef.current = true
+      return
+    }
+
+    if (!hasFirebaseSyncConfig) {
+      setSyncState('local')
+      setIsPlayerLoading(false)
+      persistReadyRef.current = true
+      return
+    }
+
+    setSyncState('connecting')
+
+    void (async () => {
+      try {
+        const remoteRecord = await loadRemoteLearningRecord(activePlayerKey)
+        if (cancelled) {
+          return
+        }
+
+        const latestRecord = pickLatestLearningRecord(localRecord, remoteRecord)
+        setLearningRecord(latestRecord)
+        saveLocalLearningRecord(activePlayerKey, latestRecord)
+
+        if (!remoteRecord || remoteRecord.updatedAt !== latestRecord.updatedAt) {
+          await saveRemoteLearningRecord(activePlayerKey, latestRecord)
+        }
+
+        if (!cancelled) {
+          setSyncState('synced')
+        }
+      } catch {
+        if (!cancelled) {
+          setSyncState('error')
+        }
+      } finally {
+        if (!cancelled) {
+          setIsPlayerLoading(false)
+          persistReadyRef.current = true
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activePlayerKey, isGuestMode])
+
+  useEffect(() => {
+    if (!persistReadyRef.current) {
+      return
+    }
+
+    saveLocalLearningRecord(activePlayerKey, learningRecord)
+    saveLastPlayerName(currentPlayerName)
+
+    if (isGuestMode || !hasFirebaseSyncConfig) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void saveRemoteLearningRecord(activePlayerKey, learningRecord)
+        .then(() => setSyncState('synced'))
+        .catch(() => setSyncState('error'))
+    }, 500)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [activePlayerKey, currentPlayerName, isGuestMode, learningRecord])
 
   useEffect(() => {
     setQuestionIndex(0)
     setDraftAnswer('')
     setSubmissionState({ status: 'idle', explanation: '' })
   }, [selectedPointId, selectedUnitId, activeMode])
+
+  function updateLearningState(updater: (state: LearningState) => LearningState) {
+    setLearningRecord((currentRecord) => ({
+      updatedAt: Date.now(),
+      learningState: updater(currentRecord.learningState),
+    }))
+  }
+
+  function activatePlayer() {
+    startTransition(() => {
+      setCurrentPlayerName(normalizePlayerName(playerNameInput))
+    })
+  }
+
+  function switchToGuestMode() {
+    startTransition(() => {
+      setCurrentPlayerName('')
+      setPlayerNameInput('')
+      setLearningRecord(createEmptyLearningRecord())
+      setSyncState('guest')
+    })
+  }
 
   function selectSemester(semesterId: string) {
     const nextSemester = courseCatalog.find((item) => item.id === semesterId)
@@ -159,7 +289,7 @@ function App() {
       explanation: currentQuestion.explanation,
     })
 
-    setLearningState((currentState) => {
+    updateLearningState((currentState) => {
       const answeredIds = currentState.answeredIds.includes(currentQuestion.id)
         ? currentState.answeredIds
         : [...currentState.answeredIds, currentQuestion.id]
@@ -226,30 +356,68 @@ function App() {
   return (
     <div className="app-shell">
       <header className="hero-panel">
-        <div>
-          <p className="eyebrow">人教版数学 3-6 年级知识点工具</p>
-          <h1>先做成体系，再逐步扩到全学段</h1>
+        <div className="hero-copy-block">
+          <p className="eyebrow">Math Knowledge Tool</p>
+          <h1>Build by knowledge points, then scale to all grades</h1>
           <p className="hero-copy">
-            当前是首版 MVP：三年级上册、2 个单元、知识点练习、单元闯关、错题复习和家长查看面板，所有记录保存在本机浏览器。
+            The current MVP includes grade 3 first semester, two sample units, focused practice, unit challenge, wrong-question review, and optional Firebase cloud sync.
           </p>
         </div>
-        <div className="hero-stats">
-          <article>
-            <span>已答题</span>
-            <strong>{answeredCount}</strong>
-          </article>
-          <article>
-            <span>正确率</span>
-            <strong>{accuracy}%</strong>
-          </article>
-          <article>
-            <span>错题数</span>
-            <strong>{wrongCount}</strong>
-          </article>
+
+        <div className="hero-side">
+          <section className="sync-panel">
+            <span className="card-label">Student Profile</span>
+            <strong className="player-title">{displayPlayerName}</strong>
+            <p className={syncMeta.className}>
+              <strong>{syncMeta.title}</strong>
+              <span>{syncMeta.body}</span>
+            </p>
+            <div className="player-form">
+              <input
+                className="player-input"
+                value={playerNameInput}
+                onChange={(event) => setPlayerNameInput(event.target.value)}
+                placeholder="Enter a student name"
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    activatePlayer()
+                  }
+                }}
+              />
+              <button type="button" className="primary-button" onClick={activatePlayer} disabled={isPlayerLoading}>
+                {hasFirebaseSyncConfig ? 'Enable Cloud Sync' : 'Switch Student'}
+              </button>
+            </div>
+            <div className="inline-actions">
+              <button type="button" className="secondary-button" onClick={switchToGuestMode}>
+                Local Guest Mode
+              </button>
+              <small className="support-note">
+                {hasFirebaseSyncConfig
+                  ? 'Firebase config detected. Progress can sync across devices.'
+                  : 'Firebase config missing. Student records still stay separate on this device.'}
+              </small>
+            </div>
+          </section>
+
+          <div className="hero-stats">
+            <article>
+              <span>Answered</span>
+              <strong>{answeredCount}</strong>
+            </article>
+            <article>
+              <span>Accuracy</span>
+              <strong>{accuracy}%</strong>
+            </article>
+            <article>
+              <span>Wrong</span>
+              <strong>{wrongCount}</strong>
+            </article>
+          </div>
         </div>
       </header>
 
-      <section className="semester-strip" aria-label="年级与册别">
+      <section className="semester-strip" aria-label="Semester Selection">
         {semesterOptions.map((option) => {
           const isActive = option.id === selectedSemesterId
           return (
@@ -261,7 +429,7 @@ function App() {
               disabled={!option.available}
             >
               <span>{option.label}</span>
-              <small>{option.available ? '已开放' : '即将开放'}</small>
+              <small>{option.available ? 'Open' : 'Soon'}</small>
             </button>
           )
         })}
@@ -270,7 +438,7 @@ function App() {
       <main className="layout-grid">
         <aside className="catalog-panel">
           <div className="panel-heading">
-            <h2>知识点目录</h2>
+            <h2>Knowledge Catalog</h2>
             <p>{semester.label}</p>
           </div>
           <div className="unit-list">
@@ -287,7 +455,7 @@ function App() {
                     <strong>{item.title}</strong>
                     <span>{item.description}</span>
                   </div>
-                  <small>完成度 {getUnitProgress(item, learningState)}%</small>
+                  <small>Progress {getUnitProgress(item, learningState)}%</small>
                 </button>
               )
             })}
@@ -306,10 +474,10 @@ function App() {
                 >
                   <strong>{item.title}</strong>
                   <span>{item.summary}</span>
-                  <small>掌握度 {pointAccuracy}%</small>
+                  <small>Mastery {pointAccuracy}%</small>
                 </button>
-              )}
-            )}
+              )
+            })}
           </div>
         </aside>
 
@@ -321,11 +489,11 @@ function App() {
             </div>
             <div className="knowledge-grid">
               <article>
-                <span className="card-label">知识卡片</span>
+                <span className="card-label">Concept Card</span>
                 <p>{knowledgePoint.concept}</p>
               </article>
               <article>
-                <span className="card-label">解题步骤</span>
+                <span className="card-label">Steps</span>
                 <ol>
                   {knowledgePoint.steps.map((step) => (
                     <li key={step}>{step}</li>
@@ -333,7 +501,7 @@ function App() {
                 </ol>
               </article>
               <article>
-                <span className="card-label">常见易错点</span>
+                <span className="card-label">Common Mistakes</span>
                 <ul className="tag-list">
                   {knowledgePoint.mistakes.map((mistake) => (
                     <li key={mistake}>{mistake}</li>
@@ -346,14 +514,14 @@ function App() {
           <section className="practice-panel">
             <div className="practice-topbar">
               <div>
-                <h2>练习模式</h2>
+                <h2>Practice Mode</h2>
                 <p>{unit.title}</p>
               </div>
               <div className="mode-switcher">
                 {[
-                  { key: 'knowledge', label: '知识点练习' },
-                  { key: 'challenge', label: '单元闯关' },
-                  { key: 'review', label: '错题复习' },
+                  { key: 'knowledge', label: 'Point Practice' },
+                  { key: 'challenge', label: 'Unit Challenge' },
+                  { key: 'review', label: 'Wrong Review' },
                 ].map((item) => {
                   const isActive = item.key === activeMode
                   return (
@@ -396,7 +564,7 @@ function App() {
                   </div>
                 ) : (
                   <label className="answer-box">
-                    <span>输入答案</span>
+                    <span>Answer</span>
                     <input
                       value={draftAnswer}
                       onChange={(event) => setDraftAnswer(event.target.value)}
@@ -407,17 +575,17 @@ function App() {
 
                 <div className="question-actions">
                   <button type="button" className="primary-button" onClick={submitAnswer}>
-                    提交答案
+                    Submit
                   </button>
                   <button type="button" className="secondary-button" onClick={moveToNextQuestion}>
-                    下一题
+                    Next
                   </button>
                 </div>
 
                 {submissionState.status !== 'idle' ? (
                   <div className={submissionState.status === 'correct' ? 'feedback-card correct' : 'feedback-card wrong'}>
-                    <strong>{submissionState.status === 'correct' ? '回答正确' : '还需要再想一步'}</strong>
-                    <p>标准答案：{currentQuestion.answerLabel}</p>
+                    <strong>{submissionState.status === 'correct' ? 'Correct' : 'Try One More Step'}</strong>
+                    <p>Expected answer: {currentQuestion.answerLabel}</p>
                     <p>{submissionState.explanation}</p>
                   </div>
                 ) : null}
@@ -430,8 +598,8 @@ function App() {
               </div>
             ) : (
               <div className="empty-card">
-                <h3>当前模式没有可练习题目</h3>
-                <p>可以先做知识点练习，系统会自动把错题加入复习列表。</p>
+                <h3>No questions in this mode yet</h3>
+                <p>Start with knowledge practice and wrong questions will automatically join the review list.</p>
               </div>
             )}
           </section>
@@ -440,48 +608,48 @@ function App() {
         <aside className="insight-panel">
           <section className="record-card">
             <div className="panel-heading">
-              <h2>学习记录</h2>
-              <p>本机保存</p>
+              <h2>Learning Record</h2>
+              <p>{isGuestMode ? 'Local guest record' : hasFirebaseSyncConfig ? 'Cloud student record' : 'Local student record'}</p>
             </div>
             <ul className="metric-list">
               <li>
-                <span>已掌握知识点</span>
+                <span>Mastered Points</span>
                 <strong>{Object.values(learningState.pointStats).filter((item) => item.answered > 0 && item.correct >= item.wrong).length}</strong>
               </li>
               <li>
-                <span>待复习题目</span>
+                <span>Review Items</span>
                 <strong>{Object.values(learningState.wrongCounts).filter((count) => count > 0).length}</strong>
               </li>
               <li>
-                <span>家长建议</span>
-                <strong>{weakTags.length > 0 ? '查看下方' : '先开始练习'}</strong>
+                <span>Current Student</span>
+                <strong>{displayPlayerName}</strong>
               </li>
             </ul>
           </section>
 
           <section className="record-card">
             <div className="panel-heading">
-              <h2>薄弱标签</h2>
-              <p>按错题累计</p>
+              <h2>Weak Tags</h2>
+              <p>Based on wrong answers</p>
             </div>
             {weakTags.length > 0 ? (
               <ul className="weak-list">
                 {weakTags.map(([tag, count]) => (
                   <li key={tag}>
                     <span>{tag}</span>
-                    <strong>{count} 次</strong>
+                    <strong>{count} times</strong>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="muted">还没有错题数据，完成几道题后这里会自动生成。</p>
+              <p className="muted">Complete a few questions and weak tags will appear here.</p>
             )}
           </section>
 
           <section className="record-card">
             <div className="panel-heading">
-              <h2>错题本</h2>
-              <p>点击直接回练</p>
+              <h2>Wrong Notebook</h2>
+              <p>Tap to revisit</p>
             </div>
             <div className="wrong-question-list">
               {unit.questions.filter((question) => (learningState.wrongCounts[question.id] ?? 0) > 0).length > 0 ? (
@@ -490,11 +658,11 @@ function App() {
                   .map((question) => (
                     <button key={question.id} type="button" className="wrong-item" onClick={() => retryWrongQuestion(question.id)}>
                       <span>{question.stem}</span>
-                      <strong>{learningState.wrongCounts[question.id]} 次</strong>
+                      <strong>{learningState.wrongCounts[question.id]} times</strong>
                     </button>
                   ))
               ) : (
-                <p className="muted">当前单元还没有加入错题本的题目。</p>
+                <p className="muted">There are no wrong questions for this unit yet.</p>
               )}
             </div>
           </section>
