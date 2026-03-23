@@ -63,39 +63,39 @@ function getSyncMeta(syncState: SyncState, isGuestMode: boolean) {
   if (isGuestMode) {
     return {
       className: 'sync-banner guest',
-      title: 'Local Trial Mode',
-      body: 'Progress stays in this browser only. Enter a student name to keep separate records.',
+      title: '\u672c\u673a\u4f53\u9a8c\u6a21\u5f0f',
+      body: '\u5f53\u524d\u6570\u636e\u4ec5\u4fdd\u5b58\u5728\u672c\u6d4f\u89c8\u5668\u3002\u8f93\u5165\u5b66\u751f\u59d3\u540d\u540e\uff0c\u53ef\u6309\u5b66\u751f\u5206\u522b\u4fdd\u5b58\u8bb0\u5f55\u3002',
     }
   }
 
   if (!hasFirebaseSyncConfig) {
     return {
       className: 'sync-banner local',
-      title: 'Local Student Mode',
-      body: 'Firebase is not configured yet. Records are still separated by student name on this device.',
+      title: '\u672c\u5730\u5b66\u751f\u6a21\u5f0f',
+      body: 'Firebase \u8fd8\u672a\u914d\u7f6e\uff0c\u5f53\u524d\u4ecd\u4f1a\u6309\u5b66\u751f\u59d3\u540d\u5206\u5f00\u4fdd\u5b58\u5728\u672c\u673a\u3002',
     }
   }
 
   if (syncState === 'connecting') {
     return {
       className: 'sync-banner connecting',
-      title: 'Connecting To Cloud',
-      body: 'Loading the latest learning record from Firebase.',
+      title: '\u6b63\u5728\u8fde\u63a5\u4e91\u7aef',
+      body: '\u6b63\u5728\u4ece Firebase \u62c9\u53d6\u8fd9\u4f4d\u5b66\u751f\u7684\u6700\u65b0\u5b66\u4e60\u8bb0\u5f55\u3002',
     }
   }
 
   if (syncState === 'error') {
     return {
       className: 'sync-banner error',
-      title: 'Cloud Sync Failed',
-      body: 'The app fell back to local storage. Check Firebase config and database rules.',
+      title: '\u4e91\u540c\u6b65\u5931\u8d25',
+      body: '\u5df2\u81ea\u52a8\u56de\u9000\u5230\u672c\u5730\u5b58\u50a8\uff0c\u8bf7\u68c0\u67e5 Firebase \u914d\u7f6e\u548c\u6570\u636e\u5e93\u89c4\u5219\u3002',
     }
   }
 
   return {
     className: 'sync-banner synced',
-    title: 'Cloud Sync Enabled',
-    body: 'The latest record for this student can continue across different devices.',
+    title: '\u4e91\u7aef\u540c\u6b65\u5df2\u5f00\u542f',
+    body: '\u540c\u4e00\u4f4d\u5b66\u751f\u53ef\u4ee5\u5728\u4e0d\u540c\u8bbe\u5907\u7ee7\u7eed\u5b66\u4e60\uff0c\u7cfb\u7edf\u4f1a\u4f18\u5148\u4fdd\u7559\u6700\u65b0\u8fdb\u5ea6\u3002',
   }
 }
 
@@ -127,7 +127,7 @@ function App() {
   const correctCount = learningState.correctIds.length
   const wrongCount = learningState.wrongIds.length
   const accuracy = answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100)
-  const displayPlayerName = isGuestMode ? 'Guest' : currentPlayerName
+  const displayPlayerName = isGuestMode ? '\u8bbf\u5ba2\u6a21\u5f0f' : currentPlayerName
   const syncMeta = getSyncMeta(syncState, isGuestMode)
 
   const weakTagEntries = Object.entries(learningState.wrongCounts)
@@ -357,16 +357,16 @@ function App() {
     <div className="app-shell">
       <header className="hero-panel">
         <div className="hero-copy-block">
-          <p className="eyebrow">Math Knowledge Tool</p>
-          <h1>Build by knowledge points, then scale to all grades</h1>
+          <p className="eyebrow">\u4eba\u6559\u7248\u6570\u5b66 3-6 \u5e74\u7ea7\u77e5\u8bc6\u70b9\u5de5\u5177</p>
+          <h1>\u5148\u505a\u6210\u4f53\u7cfb\uff0c\u518d\u9010\u6b65\u6269\u5230\u5168\u5b66\u6bb5</h1>
           <p className="hero-copy">
-            The current MVP includes grade 3 first semester, two sample units, focused practice, unit challenge, wrong-question review, and optional Firebase cloud sync.
+            \u5f53\u524d\u662f\u9996\u7248 MVP\uff1a\u4e09\u5e74\u7ea7\u4e0a\u518c\u30012 \u4e2a\u5355\u5143\u3001\u77e5\u8bc6\u70b9\u7ec3\u4e60\u3001\u5355\u5143\u95ef\u5173\u3001\u9519\u9898\u590d\u4e60\u548c Firebase \u4e91\u540c\u6b65\u3002
           </p>
         </div>
 
         <div className="hero-side">
           <section className="sync-panel">
-            <span className="card-label">Student Profile</span>
+            <span className="card-label">\u5b66\u751f\u6863\u6848</span>
             <strong className="player-title">{displayPlayerName}</strong>
             <p className={syncMeta.className}>
               <strong>{syncMeta.title}</strong>
@@ -377,7 +377,7 @@ function App() {
                 className="player-input"
                 value={playerNameInput}
                 onChange={(event) => setPlayerNameInput(event.target.value)}
-                placeholder="Enter a student name"
+                placeholder="\u8f93\u5165\u5b66\u751f\u59d3\u540d"
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     activatePlayer()
@@ -385,39 +385,39 @@ function App() {
                 }}
               />
               <button type="button" className="primary-button" onClick={activatePlayer} disabled={isPlayerLoading}>
-                {hasFirebaseSyncConfig ? 'Enable Cloud Sync' : 'Switch Student'}
+                {hasFirebaseSyncConfig ? '\u8fdb\u5165\u4e91\u540c\u6b65' : '\u5207\u6362\u5b66\u751f'}
               </button>
             </div>
             <div className="inline-actions">
               <button type="button" className="secondary-button" onClick={switchToGuestMode}>
-                Local Guest Mode
+                \u672c\u673a\u4e34\u65f6\u5b66\u4e60
               </button>
               <small className="support-note">
                 {hasFirebaseSyncConfig
-                  ? 'Firebase config detected. Progress can sync across devices.'
-                  : 'Firebase config missing. Student records still stay separate on this device.'}
+                  ? '\u5df2\u68c0\u6d4b\u5230 Firebase \u914d\u7f6e\uff0c\u5b66\u4e60\u8fdb\u5ea6\u53ef\u5728\u4e0d\u540c\u8bbe\u5907\u95f4\u540c\u6b65\u3002'
+                  : '\u5c1a\u672a\u914d\u7f6e Firebase\uff0c\u5f53\u524d\u4ecd\u4f1a\u6309\u5b66\u751f\u59d3\u540d\u5206\u522b\u4fdd\u5b58\u5728\u672c\u673a\u3002'}
               </small>
             </div>
           </section>
 
           <div className="hero-stats">
             <article>
-              <span>Answered</span>
+              <span>\u5df2\u7b54\u9898</span>
               <strong>{answeredCount}</strong>
             </article>
             <article>
-              <span>Accuracy</span>
+              <span>\u6b63\u786e\u7387</span>
               <strong>{accuracy}%</strong>
             </article>
             <article>
-              <span>Wrong</span>
+              <span>\u9519\u9898\u6570</span>
               <strong>{wrongCount}</strong>
             </article>
           </div>
         </div>
       </header>
 
-      <section className="semester-strip" aria-label="Semester Selection">
+      <section className="semester-strip" aria-label="\u5e74\u7ea7\u4e0e\u518c\u522b">
         {semesterOptions.map((option) => {
           const isActive = option.id === selectedSemesterId
           return (
@@ -429,7 +429,7 @@ function App() {
               disabled={!option.available}
             >
               <span>{option.label}</span>
-              <small>{option.available ? 'Open' : 'Soon'}</small>
+              <small>{option.available ? '\u5df2\u5f00\u653e' : '\u5373\u5c06\u5f00\u653e'}</small>
             </button>
           )
         })}
@@ -438,7 +438,7 @@ function App() {
       <main className="layout-grid">
         <aside className="catalog-panel">
           <div className="panel-heading">
-            <h2>Knowledge Catalog</h2>
+            <h2>\u77e5\u8bc6\u70b9\u76ee\u5f55</h2>
             <p>{semester.label}</p>
           </div>
           <div className="unit-list">
@@ -455,7 +455,7 @@ function App() {
                     <strong>{item.title}</strong>
                     <span>{item.description}</span>
                   </div>
-                  <small>Progress {getUnitProgress(item, learningState)}%</small>
+                  <small>\u5b8c\u6210\u5ea6 {getUnitProgress(item, learningState)}%</small>
                 </button>
               )
             })}
@@ -474,7 +474,7 @@ function App() {
                 >
                   <strong>{item.title}</strong>
                   <span>{item.summary}</span>
-                  <small>Mastery {pointAccuracy}%</small>
+                  <small>\u638c\u63e1\u5ea6 {pointAccuracy}%</small>
                 </button>
               )
             })}
@@ -489,11 +489,11 @@ function App() {
             </div>
             <div className="knowledge-grid">
               <article>
-                <span className="card-label">Concept Card</span>
+                <span className="card-label">\u77e5\u8bc6\u5361\u7247</span>
                 <p>{knowledgePoint.concept}</p>
               </article>
               <article>
-                <span className="card-label">Steps</span>
+                <span className="card-label">\u89e3\u9898\u6b65\u9aa4</span>
                 <ol>
                   {knowledgePoint.steps.map((step) => (
                     <li key={step}>{step}</li>
@@ -501,7 +501,7 @@ function App() {
                 </ol>
               </article>
               <article>
-                <span className="card-label">Common Mistakes</span>
+                <span className="card-label">\u5e38\u89c1\u6613\u9519\u70b9</span>
                 <ul className="tag-list">
                   {knowledgePoint.mistakes.map((mistake) => (
                     <li key={mistake}>{mistake}</li>
@@ -514,14 +514,14 @@ function App() {
           <section className="practice-panel">
             <div className="practice-topbar">
               <div>
-                <h2>Practice Mode</h2>
+                <h2>\u7ec3\u4e60\u6a21\u5f0f</h2>
                 <p>{unit.title}</p>
               </div>
               <div className="mode-switcher">
                 {[
-                  { key: 'knowledge', label: 'Point Practice' },
-                  { key: 'challenge', label: 'Unit Challenge' },
-                  { key: 'review', label: 'Wrong Review' },
+                  { key: 'knowledge', label: '\u77e5\u8bc6\u70b9\u7ec3\u4e60' },
+                  { key: 'challenge', label: '\u5355\u5143\u95ef\u5173' },
+                  { key: 'review', label: '\u9519\u9898\u590d\u4e60' },
                 ].map((item) => {
                   const isActive = item.key === activeMode
                   return (
@@ -564,7 +564,7 @@ function App() {
                   </div>
                 ) : (
                   <label className="answer-box">
-                    <span>Answer</span>
+                    <span>\u8f93\u5165\u7b54\u6848</span>
                     <input
                       value={draftAnswer}
                       onChange={(event) => setDraftAnswer(event.target.value)}
@@ -575,17 +575,17 @@ function App() {
 
                 <div className="question-actions">
                   <button type="button" className="primary-button" onClick={submitAnswer}>
-                    Submit
+                    \u63d0\u4ea4\u7b54\u6848
                   </button>
                   <button type="button" className="secondary-button" onClick={moveToNextQuestion}>
-                    Next
+                    \u4e0b\u4e00\u9898
                   </button>
                 </div>
 
                 {submissionState.status !== 'idle' ? (
                   <div className={submissionState.status === 'correct' ? 'feedback-card correct' : 'feedback-card wrong'}>
-                    <strong>{submissionState.status === 'correct' ? 'Correct' : 'Try One More Step'}</strong>
-                    <p>Expected answer: {currentQuestion.answerLabel}</p>
+                    <strong>{submissionState.status === 'correct' ? '\u56de\u7b54\u6b63\u786e' : '\u8fd8\u9700\u518d\u60f3\u4e00\u6b65'}</strong>
+                    <p>\u6807\u51c6\u7b54\u6848\uff1a{currentQuestion.answerLabel}</p>
                     <p>{submissionState.explanation}</p>
                   </div>
                 ) : null}
@@ -598,8 +598,8 @@ function App() {
               </div>
             ) : (
               <div className="empty-card">
-                <h3>No questions in this mode yet</h3>
-                <p>Start with knowledge practice and wrong questions will automatically join the review list.</p>
+                <h3>\u5f53\u524d\u6a21\u5f0f\u8fd8\u6ca1\u6709\u53ef\u7ec3\u4e60\u7684\u9898\u76ee</h3>
+                <p>\u53ef\u4ee5\u5148\u505a\u77e5\u8bc6\u70b9\u7ec3\u4e60\uff0c\u7cfb\u7edf\u4f1a\u81ea\u52a8\u628a\u9519\u9898\u52a0\u5165\u590d\u4e60\u5217\u8868\u3002</p>
               </div>
             )}
           </section>
@@ -608,20 +608,20 @@ function App() {
         <aside className="insight-panel">
           <section className="record-card">
             <div className="panel-heading">
-              <h2>Learning Record</h2>
-              <p>{isGuestMode ? 'Local guest record' : hasFirebaseSyncConfig ? 'Cloud student record' : 'Local student record'}</p>
+              <h2>\u5b66\u4e60\u8bb0\u5f55</h2>
+              <p>{isGuestMode ? '\u672c\u673a\u4e34\u65f6\u8bb0\u5f55' : hasFirebaseSyncConfig ? '\u5b66\u751f\u4e91\u540c\u6b65' : '\u5b66\u751f\u672c\u5730\u8bb0\u5f55'}</p>
             </div>
             <ul className="metric-list">
               <li>
-                <span>Mastered Points</span>
+                <span>\u5df2\u638c\u63e1\u77e5\u8bc6\u70b9</span>
                 <strong>{Object.values(learningState.pointStats).filter((item) => item.answered > 0 && item.correct >= item.wrong).length}</strong>
               </li>
               <li>
-                <span>Review Items</span>
+                <span>\u5f85\u590d\u4e60\u9898\u76ee</span>
                 <strong>{Object.values(learningState.wrongCounts).filter((count) => count > 0).length}</strong>
               </li>
               <li>
-                <span>Current Student</span>
+                <span>\u5f53\u524d\u5b66\u751f</span>
                 <strong>{displayPlayerName}</strong>
               </li>
             </ul>
@@ -629,27 +629,27 @@ function App() {
 
           <section className="record-card">
             <div className="panel-heading">
-              <h2>Weak Tags</h2>
-              <p>Based on wrong answers</p>
+              <h2>\u8584\u5f31\u6807\u7b7e</h2>
+              <p>\u6309\u9519\u9898\u7edf\u8ba1</p>
             </div>
             {weakTags.length > 0 ? (
               <ul className="weak-list">
                 {weakTags.map(([tag, count]) => (
                   <li key={tag}>
                     <span>{tag}</span>
-                    <strong>{count} times</strong>
+                    <strong>{count} \u6b21</strong>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="muted">Complete a few questions and weak tags will appear here.</p>
+              <p className="muted">\u5b8c\u6210\u51e0\u9053\u9898\u540e\uff0c\u8fd9\u91cc\u4f1a\u81ea\u52a8\u751f\u6210\u8584\u5f31\u6807\u7b7e\u3002</p>
             )}
           </section>
 
           <section className="record-card">
             <div className="panel-heading">
-              <h2>Wrong Notebook</h2>
-              <p>Tap to revisit</p>
+              <h2>\u9519\u9898\u672c</h2>
+              <p>\u70b9\u51fb\u53ef\u76f4\u63a5\u56de\u7ec3</p>
             </div>
             <div className="wrong-question-list">
               {unit.questions.filter((question) => (learningState.wrongCounts[question.id] ?? 0) > 0).length > 0 ? (
@@ -658,11 +658,11 @@ function App() {
                   .map((question) => (
                     <button key={question.id} type="button" className="wrong-item" onClick={() => retryWrongQuestion(question.id)}>
                       <span>{question.stem}</span>
-                      <strong>{learningState.wrongCounts[question.id]} times</strong>
+                      <strong>{learningState.wrongCounts[question.id]} \u6b21</strong>
                     </button>
                   ))
               ) : (
-                <p className="muted">There are no wrong questions for this unit yet.</p>
+                <p className="muted">\u5f53\u524d\u5355\u5143\u8fd8\u6ca1\u6709\u52a0\u5165\u9519\u9898\u672c\u7684\u9898\u76ee\u3002</p>
               )}
             </div>
           </section>
