@@ -2,6 +2,11 @@
 
 一个基于 Vite + React + TypeScript 的小学数学知识点学习工具原型。
 
+## 在线访问
+
+- 公网页面：<https://peihan-banana.github.io/Math_Knowledge/>
+- 网页二维码：`public/math-knowledge-pages-qr.png`
+
 ## 当前版本
 
 当前已实现首版 MVP：
