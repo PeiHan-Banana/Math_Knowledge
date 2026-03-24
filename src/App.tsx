@@ -29,6 +29,74 @@ type SubmissionState = {
 
 type SyncState = 'guest' | 'local' | 'connecting' | 'synced' | 'error'
 
+const TEXT = {
+  guestMode: '\u8bbf\u5ba2\u6a21\u5f0f',
+  syncGuestTitle: '\u672c\u673a\u4f53\u9a8c\u6a21\u5f0f',
+  syncGuestBody: '\u5f53\u524d\u6570\u636e\u4ec5\u4fdd\u5b58\u5728\u672c\u6d4f\u89c8\u5668\u3002\u8f93\u5165\u5b66\u751f\u59d3\u540d\u540e\uff0c\u53ef\u6309\u5b66\u751f\u5206\u522b\u4fdd\u5b58\u8bb0\u5f55\u3002',
+  syncLocalTitle: '\u672c\u5730\u5b66\u751f\u6a21\u5f0f',
+  syncLocalBody: 'Firebase \u8fd8\u672a\u914d\u7f6e\uff0c\u5f53\u524d\u4ecd\u4f1a\u6309\u5b66\u751f\u59d3\u540d\u5206\u5f00\u4fdd\u5b58\u5728\u672c\u673a\u3002',
+  syncConnectingTitle: '\u6b63\u5728\u8fde\u63a5\u4e91\u7aef',
+  syncConnectingBody: '\u6b63\u5728\u4ece Firebase \u62c9\u53d6\u8fd9\u4f4d\u5b66\u751f\u7684\u6700\u65b0\u5b66\u4e60\u8bb0\u5f55\u3002',
+  syncErrorTitle: '\u4e91\u540c\u6b65\u5931\u8d25',
+  syncErrorBody: '\u5df2\u81ea\u52a8\u56de\u9000\u5230\u672c\u5730\u5b58\u50a8\uff0c\u8bf7\u68c0\u67e5 Firebase \u914d\u7f6e\u548c\u6570\u636e\u5e93\u89c4\u5219\u3002',
+  syncReadyTitle: '\u4e91\u7aef\u540c\u6b65\u5df2\u5f00\u542f',
+  syncReadyBody: '\u540c\u4e00\u4f4d\u5b66\u751f\u53ef\u4ee5\u5728\u4e0d\u540c\u8bbe\u5907\u7ee7\u7eed\u5b66\u4e60\uff0c\u7cfb\u7edf\u4f1a\u4f18\u5148\u4fdd\u7559\u6700\u65b0\u8fdb\u5ea6\u3002',
+  eyebrow: '\u4eba\u6559\u7248\u6570\u5b66 3-6 \u5e74\u7ea7\u77e5\u8bc6\u70b9\u5de5\u5177',
+  heroTitle: '\u5148\u505a\u6210\u4f53\u7cfb\uff0c\u518d\u9010\u6b65\u6269\u5230\u5168\u5b66\u6bb5',
+  heroBody: '\u5f53\u524d\u5df2\u8986\u76d6 3-6 \u5e74\u7ea7\u5171 8 \u4e2a\u5b66\u671f\u300132 \u4e2a\u5355\u5143\uff0c\u652f\u6301\u77e5\u8bc6\u70b9\u603b\u7ed3\u3001\u5206\u5c42\u7ec3\u4e60\u3001\u9519\u9898\u590d\u4e60\u548c Firebase \u4e91\u540c\u6b65\uff0c\u540e\u7eed\u7ee7\u7eed\u8865\u5145\u66f4\u591a\u9898\u76ee\u4e0e\u603b\u590d\u4e60\u5185\u5bb9\u3002',
+  studentProfile: '\u5b66\u751f\u6863\u6848',
+  inputStudentName: '\u8f93\u5165\u5b66\u751f\u59d3\u540d',
+  enterCloudSync: '\u8fdb\u5165\u4e91\u540c\u6b65',
+  switchStudent: '\u5207\u6362\u5b66\u751f',
+  localTempLearning: '\u672c\u673a\u4e34\u65f6\u5b66\u4e60',
+  firebaseDetected: '\u5df2\u68c0\u6d4b\u5230 Firebase \u914d\u7f6e\uff0c\u5b66\u4e60\u8fdb\u5ea6\u53ef\u5728\u4e0d\u540c\u8bbe\u5907\u95f4\u540c\u6b65\u3002',
+  firebaseMissing: '\u5c1a\u672a\u914d\u7f6e Firebase\uff0c\u5f53\u524d\u4ecd\u4f1a\u6309\u5b66\u751f\u59d3\u540d\u5206\u522b\u4fdd\u5b58\u5728\u672c\u673a\u3002',
+  answered: '\u5df2\u7b54\u9898',
+  accuracy: '\u6b63\u786e\u7387',
+  wrongCount: '\u9519\u9898\u6570',
+  semesterAria: '\u5e74\u7ea7\u4e0e\u518c\u522b',
+  opened: '\u5df2\u5f00\u653e',
+  comingSoon: '\u5373\u5c06\u5f00\u653e',
+  knowledgeCatalog: '\u77e5\u8bc6\u70b9\u76ee\u5f55',
+  progressPrefix: '\u5b8c\u6210\u5ea6 ',
+  masteryPrefix: '\u638c\u63e1\u5ea6 ',
+  knowledgeCard: '\u77e5\u8bc6\u5361\u7247',
+  solveSteps: '\u89e3\u9898\u6b65\u9aa4',
+  commonMistakes: '\u5e38\u89c1\u6613\u9519\u70b9',
+  practiceMode: '\u7ec3\u4e60\u6a21\u5f0f',
+  modeKnowledge: '\u77e5\u8bc6\u70b9\u7ec3\u4e60',
+  modeChallenge: '\u5355\u5143\u95ef\u5173',
+  modeReview: '\u9519\u9898\u590d\u4e60',
+  inputAnswer: '\u8f93\u5165\u7b54\u6848',
+  submitAnswer: '\u63d0\u4ea4\u7b54\u6848',
+  nextQuestion: '\u4e0b\u4e00\u9898',
+  correct: '\u56de\u7b54\u6b63\u786e',
+  wrong: '\u8fd8\u9700\u518d\u60f3\u4e00\u6b65',
+  standardAnswer: '\u6807\u51c6\u7b54\u6848\uff1a',
+  emptyPracticeTitle: '\u5f53\u524d\u6a21\u5f0f\u8fd8\u6ca1\u6709\u53ef\u7ec3\u4e60\u7684\u9898\u76ee',
+  emptyPracticeBody: '\u53ef\u4ee5\u5148\u505a\u77e5\u8bc6\u70b9\u7ec3\u4e60\uff0c\u7cfb\u7edf\u4f1a\u81ea\u52a8\u628a\u9519\u9898\u52a0\u5165\u590d\u4e60\u5217\u8868\u3002',
+  learningRecord: '\u5b66\u4e60\u8bb0\u5f55',
+  guestRecord: '\u672c\u673a\u4e34\u65f6\u8bb0\u5f55',
+  cloudRecord: '\u5b66\u751f\u4e91\u540c\u6b65',
+  localRecord: '\u5b66\u751f\u672c\u5730\u8bb0\u5f55',
+  masteredPoints: '\u5df2\u638c\u63e1\u77e5\u8bc6\u70b9',
+  pendingReview: '\u5f85\u590d\u4e60\u9898\u76ee',
+  currentStudent: '\u5f53\u524d\u5b66\u751f',
+  weakTags: '\u8584\u5f31\u6807\u7b7e',
+  weakTagsDesc: '\u6309\u9519\u9898\u7edf\u8ba1',
+  timesSuffix: '\u6b21',
+  weakTagsEmpty: '\u5b8c\u6210\u51e0\u9053\u9898\u540e\uff0c\u8fd9\u91cc\u4f1a\u81ea\u52a8\u751f\u6210\u8584\u5f31\u6807\u7b7e\u3002',
+  wrongBook: '\u9519\u9898\u672c',
+  wrongBookDesc: '\u70b9\u51fb\u53ef\u76f4\u63a5\u56de\u7ec3',
+  wrongBookEmpty: '\u5f53\u524d\u5355\u5143\u8fd8\u6ca1\u6709\u52a0\u5165\u9519\u9898\u672c\u7684\u9898\u76ee\u3002',
+} as const
+
+const MODE_OPTIONS: Array<{ key: PracticeMode; label: string }> = [
+  { key: 'knowledge', label: TEXT.modeKnowledge },
+  { key: 'challenge', label: TEXT.modeChallenge },
+  { key: 'review', label: TEXT.modeReview },
+]
+
 function normalizeAnswer(value: string) {
   return value.trim().replace(/\s+/g, '').replaceAll('\uFF0C', ',').toLowerCase()
 }
@@ -63,39 +131,39 @@ function getSyncMeta(syncState: SyncState, isGuestMode: boolean) {
   if (isGuestMode) {
     return {
       className: 'sync-banner guest',
-      title: '\u672c\u673a\u4f53\u9a8c\u6a21\u5f0f',
-      body: '\u5f53\u524d\u6570\u636e\u4ec5\u4fdd\u5b58\u5728\u672c\u6d4f\u89c8\u5668\u3002\u8f93\u5165\u5b66\u751f\u59d3\u540d\u540e\uff0c\u53ef\u6309\u5b66\u751f\u5206\u522b\u4fdd\u5b58\u8bb0\u5f55\u3002',
+      title: TEXT.syncGuestTitle,
+      body: TEXT.syncGuestBody,
     }
   }
 
   if (!hasFirebaseSyncConfig) {
     return {
       className: 'sync-banner local',
-      title: '\u672c\u5730\u5b66\u751f\u6a21\u5f0f',
-      body: 'Firebase \u8fd8\u672a\u914d\u7f6e\uff0c\u5f53\u524d\u4ecd\u4f1a\u6309\u5b66\u751f\u59d3\u540d\u5206\u5f00\u4fdd\u5b58\u5728\u672c\u673a\u3002',
+      title: TEXT.syncLocalTitle,
+      body: TEXT.syncLocalBody,
     }
   }
 
   if (syncState === 'connecting') {
     return {
       className: 'sync-banner connecting',
-      title: '\u6b63\u5728\u8fde\u63a5\u4e91\u7aef',
-      body: '\u6b63\u5728\u4ece Firebase \u62c9\u53d6\u8fd9\u4f4d\u5b66\u751f\u7684\u6700\u65b0\u5b66\u4e60\u8bb0\u5f55\u3002',
+      title: TEXT.syncConnectingTitle,
+      body: TEXT.syncConnectingBody,
     }
   }
 
   if (syncState === 'error') {
     return {
       className: 'sync-banner error',
-      title: '\u4e91\u540c\u6b65\u5931\u8d25',
-      body: '\u5df2\u81ea\u52a8\u56de\u9000\u5230\u672c\u5730\u5b58\u50a8\uff0c\u8bf7\u68c0\u67e5 Firebase \u914d\u7f6e\u548c\u6570\u636e\u5e93\u89c4\u5219\u3002',
+      title: TEXT.syncErrorTitle,
+      body: TEXT.syncErrorBody,
     }
   }
 
   return {
     className: 'sync-banner synced',
-    title: '\u4e91\u7aef\u540c\u6b65\u5df2\u5f00\u542f',
-    body: '\u540c\u4e00\u4f4d\u5b66\u751f\u53ef\u4ee5\u5728\u4e0d\u540c\u8bbe\u5907\u7ee7\u7eed\u5b66\u4e60\uff0c\u7cfb\u7edf\u4f1a\u4f18\u5148\u4fdd\u7559\u6700\u65b0\u8fdb\u5ea6\u3002',
+    title: TEXT.syncReadyTitle,
+    body: TEXT.syncReadyBody,
   }
 }
 
@@ -131,7 +199,7 @@ function App() {
   const correctCount = learningState.correctIds.length
   const wrongCount = learningState.wrongIds.length
   const accuracy = answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100)
-  const displayPlayerName = isGuestMode ? '\u8bbf\u5ba2\u6a21\u5f0f' : currentPlayerName
+  const displayPlayerName = isGuestMode ? TEXT.guestMode : currentPlayerName
   const syncMeta = getSyncMeta(syncState, isGuestMode)
 
   const weakTagEntries = Object.entries(learningState.wrongCounts)
@@ -361,16 +429,14 @@ function App() {
     <div className="app-shell">
       <header className="hero-panel">
         <div className="hero-copy-block">
-          <p className="eyebrow">\u4eba\u6559\u7248\u6570\u5b66 3-6 \u5e74\u7ea7\u77e5\u8bc6\u70b9\u5de5\u5177</p>
-          <h1>\u5148\u505a\u6210\u4f53\u7cfb\uff0c\u518d\u9010\u6b65\u6269\u5230\u5168\u5b66\u6bb5</h1>
-          <p className="hero-copy">
-            当前已覆盖 3-6 年级共 8 个学期、32 个单元，支持知识点总结、分层练习、错题复习和 Firebase 云同步，后续继续补充更多题目与总复习内容。
-          </p>
+          <p className="eyebrow">{TEXT.eyebrow}</p>
+          <h1>{TEXT.heroTitle}</h1>
+          <p className="hero-copy">{TEXT.heroBody}</p>
         </div>
 
         <div className="hero-side">
           <section className="sync-panel">
-            <span className="card-label">\u5b66\u751f\u6863\u6848</span>
+            <span className="card-label">{TEXT.studentProfile}</span>
             <strong className="player-title">{displayPlayerName}</strong>
             <p className={syncMeta.className}>
               <strong>{syncMeta.title}</strong>
@@ -381,7 +447,7 @@ function App() {
                 className="player-input"
                 value={playerNameInput}
                 onChange={(event) => setPlayerNameInput(event.target.value)}
-                placeholder="\u8f93\u5165\u5b66\u751f\u59d3\u540d"
+                placeholder={TEXT.inputStudentName}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     activatePlayer()
@@ -389,39 +455,35 @@ function App() {
                 }}
               />
               <button type="button" className="primary-button" onClick={activatePlayer} disabled={isPlayerLoading}>
-                {hasFirebaseSyncConfig ? '\u8fdb\u5165\u4e91\u540c\u6b65' : '\u5207\u6362\u5b66\u751f'}
+                {hasFirebaseSyncConfig ? TEXT.enterCloudSync : TEXT.switchStudent}
               </button>
             </div>
             <div className="inline-actions">
               <button type="button" className="secondary-button" onClick={switchToGuestMode}>
-                \u672c\u673a\u4e34\u65f6\u5b66\u4e60
+                {TEXT.localTempLearning}
               </button>
-              <small className="support-note">
-                {hasFirebaseSyncConfig
-                  ? '\u5df2\u68c0\u6d4b\u5230 Firebase \u914d\u7f6e\uff0c\u5b66\u4e60\u8fdb\u5ea6\u53ef\u5728\u4e0d\u540c\u8bbe\u5907\u95f4\u540c\u6b65\u3002'
-                  : '\u5c1a\u672a\u914d\u7f6e Firebase\uff0c\u5f53\u524d\u4ecd\u4f1a\u6309\u5b66\u751f\u59d3\u540d\u5206\u522b\u4fdd\u5b58\u5728\u672c\u673a\u3002'}
-              </small>
+              <small className="support-note">{hasFirebaseSyncConfig ? TEXT.firebaseDetected : TEXT.firebaseMissing}</small>
             </div>
           </section>
 
           <div className="hero-stats">
             <article>
-              <span>\u5df2\u7b54\u9898</span>
+              <span>{TEXT.answered}</span>
               <strong>{answeredCount}</strong>
             </article>
             <article>
-              <span>\u6b63\u786e\u7387</span>
+              <span>{TEXT.accuracy}</span>
               <strong>{accuracy}%</strong>
             </article>
             <article>
-              <span>\u9519\u9898\u6570</span>
+              <span>{TEXT.wrongCount}</span>
               <strong>{wrongCount}</strong>
             </article>
           </div>
         </div>
       </header>
 
-      <section className="semester-strip" aria-label="\u5e74\u7ea7\u4e0e\u518c\u522b">
+      <section className="semester-strip" aria-label={TEXT.semesterAria}>
         {semesterOptions.map((option) => {
           const isActive = option.id === selectedSemesterId
           return (
@@ -433,7 +495,7 @@ function App() {
               disabled={!option.available}
             >
               <span>{option.label}</span>
-              <small>{option.available ? '\u5df2\u5f00\u653e' : '\u5373\u5c06\u5f00\u653e'}</small>
+              <small>{option.available ? TEXT.opened : TEXT.comingSoon}</small>
             </button>
           )
         })}
@@ -442,7 +504,7 @@ function App() {
       <main className="layout-grid">
         <aside className="catalog-panel">
           <div className="panel-heading">
-            <h2>\u77e5\u8bc6\u70b9\u76ee\u5f55</h2>
+            <h2>{TEXT.knowledgeCatalog}</h2>
             <p>{semester.label}</p>
           </div>
           <div className="unit-list">
@@ -459,7 +521,7 @@ function App() {
                     <strong>{item.title}</strong>
                     <span>{item.description}</span>
                   </div>
-                  <small>\u5b8c\u6210\u5ea6 {getUnitProgress(item, learningState)}%</small>
+                  <small>{TEXT.progressPrefix}{getUnitProgress(item, learningState)}%</small>
                 </button>
               )
             })}
@@ -478,7 +540,7 @@ function App() {
                 >
                   <strong>{item.title}</strong>
                   <span>{item.summary}</span>
-                  <small>\u638c\u63e1\u5ea6 {pointAccuracy}%</small>
+                  <small>{TEXT.masteryPrefix}{pointAccuracy}%</small>
                 </button>
               )
             })}
@@ -493,11 +555,11 @@ function App() {
             </div>
             <div className="knowledge-grid">
               <article>
-                <span className="card-label">\u77e5\u8bc6\u5361\u7247</span>
+                <span className="card-label">{TEXT.knowledgeCard}</span>
                 <p>{knowledgePoint.concept}</p>
               </article>
               <article>
-                <span className="card-label">\u89e3\u9898\u6b65\u9aa4</span>
+                <span className="card-label">{TEXT.solveSteps}</span>
                 <ol>
                   {knowledgePoint.steps.map((step) => (
                     <li key={step}>{step}</li>
@@ -505,7 +567,7 @@ function App() {
                 </ol>
               </article>
               <article>
-                <span className="card-label">\u5e38\u89c1\u6613\u9519\u70b9</span>
+                <span className="card-label">{TEXT.commonMistakes}</span>
                 <ul className="tag-list">
                   {knowledgePoint.mistakes.map((mistake) => (
                     <li key={mistake}>{mistake}</li>
@@ -518,22 +580,18 @@ function App() {
           <section className="practice-panel">
             <div className="practice-topbar">
               <div>
-                <h2>\u7ec3\u4e60\u6a21\u5f0f</h2>
+                <h2>{TEXT.practiceMode}</h2>
                 <p>{unit.title}</p>
               </div>
               <div className="mode-switcher">
-                {[
-                  { key: 'knowledge', label: '\u77e5\u8bc6\u70b9\u7ec3\u4e60' },
-                  { key: 'challenge', label: '\u5355\u5143\u95ef\u5173' },
-                  { key: 'review', label: '\u9519\u9898\u590d\u4e60' },
-                ].map((item) => {
+                {MODE_OPTIONS.map((item) => {
                   const isActive = item.key === activeMode
                   return (
                     <button
                       key={item.key}
                       type="button"
                       className={isActive ? 'mode-chip active' : 'mode-chip'}
-                      onClick={() => setActiveMode(item.key as PracticeMode)}
+                      onClick={() => setActiveMode(item.key)}
                     >
                       {item.label}
                     </button>
@@ -568,7 +626,7 @@ function App() {
                   </div>
                 ) : (
                   <label className="answer-box">
-                    <span>\u8f93\u5165\u7b54\u6848</span>
+                    <span>{TEXT.inputAnswer}</span>
                     <input
                       value={draftAnswer}
                       onChange={(event) => setDraftAnswer(event.target.value)}
@@ -579,17 +637,17 @@ function App() {
 
                 <div className="question-actions">
                   <button type="button" className="primary-button" onClick={submitAnswer}>
-                    \u63d0\u4ea4\u7b54\u6848
+                    {TEXT.submitAnswer}
                   </button>
                   <button type="button" className="secondary-button" onClick={moveToNextQuestion}>
-                    \u4e0b\u4e00\u9898
+                    {TEXT.nextQuestion}
                   </button>
                 </div>
 
                 {submissionState.status !== 'idle' ? (
                   <div className={submissionState.status === 'correct' ? 'feedback-card correct' : 'feedback-card wrong'}>
-                    <strong>{submissionState.status === 'correct' ? '\u56de\u7b54\u6b63\u786e' : '\u8fd8\u9700\u518d\u60f3\u4e00\u6b65'}</strong>
-                    <p>\u6807\u51c6\u7b54\u6848\uff1a{currentQuestion.answerLabel}</p>
+                    <strong>{submissionState.status === 'correct' ? TEXT.correct : TEXT.wrong}</strong>
+                    <p>{TEXT.standardAnswer}{currentQuestion.answerLabel}</p>
                     <p>{submissionState.explanation}</p>
                   </div>
                 ) : null}
@@ -602,8 +660,8 @@ function App() {
               </div>
             ) : (
               <div className="empty-card">
-                <h3>\u5f53\u524d\u6a21\u5f0f\u8fd8\u6ca1\u6709\u53ef\u7ec3\u4e60\u7684\u9898\u76ee</h3>
-                <p>\u53ef\u4ee5\u5148\u505a\u77e5\u8bc6\u70b9\u7ec3\u4e60\uff0c\u7cfb\u7edf\u4f1a\u81ea\u52a8\u628a\u9519\u9898\u52a0\u5165\u590d\u4e60\u5217\u8868\u3002</p>
+                <h3>{TEXT.emptyPracticeTitle}</h3>
+                <p>{TEXT.emptyPracticeBody}</p>
               </div>
             )}
           </section>
@@ -612,20 +670,20 @@ function App() {
         <aside className="insight-panel">
           <section className="record-card">
             <div className="panel-heading">
-              <h2>\u5b66\u4e60\u8bb0\u5f55</h2>
-              <p>{isGuestMode ? '\u672c\u673a\u4e34\u65f6\u8bb0\u5f55' : hasFirebaseSyncConfig ? '\u5b66\u751f\u4e91\u540c\u6b65' : '\u5b66\u751f\u672c\u5730\u8bb0\u5f55'}</p>
+              <h2>{TEXT.learningRecord}</h2>
+              <p>{isGuestMode ? TEXT.guestRecord : hasFirebaseSyncConfig ? TEXT.cloudRecord : TEXT.localRecord}</p>
             </div>
             <ul className="metric-list">
               <li>
-                <span>\u5df2\u638c\u63e1\u77e5\u8bc6\u70b9</span>
+                <span>{TEXT.masteredPoints}</span>
                 <strong>{Object.values(learningState.pointStats).filter((item) => item.answered > 0 && item.correct >= item.wrong).length}</strong>
               </li>
               <li>
-                <span>\u5f85\u590d\u4e60\u9898\u76ee</span>
+                <span>{TEXT.pendingReview}</span>
                 <strong>{Object.values(learningState.wrongCounts).filter((count) => count > 0).length}</strong>
               </li>
               <li>
-                <span>\u5f53\u524d\u5b66\u751f</span>
+                <span>{TEXT.currentStudent}</span>
                 <strong>{displayPlayerName}</strong>
               </li>
             </ul>
@@ -633,27 +691,27 @@ function App() {
 
           <section className="record-card">
             <div className="panel-heading">
-              <h2>\u8584\u5f31\u6807\u7b7e</h2>
-              <p>\u6309\u9519\u9898\u7edf\u8ba1</p>
+              <h2>{TEXT.weakTags}</h2>
+              <p>{TEXT.weakTagsDesc}</p>
             </div>
             {weakTags.length > 0 ? (
               <ul className="weak-list">
                 {weakTags.map(([tag, count]) => (
                   <li key={tag}>
                     <span>{tag}</span>
-                    <strong>{count} \u6b21</strong>
+                    <strong>{count} {TEXT.timesSuffix}</strong>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="muted">\u5b8c\u6210\u51e0\u9053\u9898\u540e\uff0c\u8fd9\u91cc\u4f1a\u81ea\u52a8\u751f\u6210\u8584\u5f31\u6807\u7b7e\u3002</p>
+              <p className="muted">{TEXT.weakTagsEmpty}</p>
             )}
           </section>
 
           <section className="record-card">
             <div className="panel-heading">
-              <h2>\u9519\u9898\u672c</h2>
-              <p>\u70b9\u51fb\u53ef\u76f4\u63a5\u56de\u7ec3</p>
+              <h2>{TEXT.wrongBook}</h2>
+              <p>{TEXT.wrongBookDesc}</p>
             </div>
             <div className="wrong-question-list">
               {unit.questions.filter((question) => (learningState.wrongCounts[question.id] ?? 0) > 0).length > 0 ? (
@@ -662,11 +720,11 @@ function App() {
                   .map((question) => (
                     <button key={question.id} type="button" className="wrong-item" onClick={() => retryWrongQuestion(question.id)}>
                       <span>{question.stem}</span>
-                      <strong>{learningState.wrongCounts[question.id]} \u6b21</strong>
+                      <strong>{learningState.wrongCounts[question.id]} {TEXT.timesSuffix}</strong>
                     </button>
                   ))
               ) : (
-                <p className="muted">\u5f53\u524d\u5355\u5143\u8fd8\u6ca1\u6709\u52a0\u5165\u9519\u9898\u672c\u7684\u9898\u76ee\u3002</p>
+                <p className="muted">{TEXT.wrongBookEmpty}</p>
               )}
             </div>
           </section>
