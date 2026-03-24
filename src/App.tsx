@@ -430,7 +430,6 @@ function App() {
       <header className="hero-panel">
         <div className="hero-copy-block">
           <p className="eyebrow">{TEXT.eyebrow}</p>
-          <h1>{TEXT.heroTitle}</h1>
           <p className="hero-copy">{TEXT.heroBody}</p>
         </div>
 
