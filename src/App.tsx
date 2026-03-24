@@ -99,13 +99,17 @@ function getSyncMeta(syncState: SyncState, isGuestMode: boolean) {
   }
 }
 
+const defaultSemester = courseCatalog[0]
+const defaultUnit = defaultSemester.units[0]
+const defaultPoint = defaultUnit.points[0]
+
 function App() {
   const initialPlayerName = loadLastPlayerName()
   const [playerNameInput, setPlayerNameInput] = useState(initialPlayerName)
   const [currentPlayerName, setCurrentPlayerName] = useState(initialPlayerName)
-  const [selectedSemesterId, setSelectedSemesterId] = useState('grade-3-fall')
-  const [selectedUnitId, setSelectedUnitId] = useState('g3-fall-unit-1')
-  const [selectedPointId, setSelectedPointId] = useState('g3-fall-time-second')
+  const [selectedSemesterId, setSelectedSemesterId] = useState(defaultSemester.id)
+  const [selectedUnitId, setSelectedUnitId] = useState(defaultUnit.id)
+  const [selectedPointId, setSelectedPointId] = useState(defaultPoint.id)
   const [activeMode, setActiveMode] = useState<PracticeMode>('knowledge')
   const [questionIndex, setQuestionIndex] = useState(0)
   const [learningRecord, setLearningRecord] = useState<LearningRecord>(() => loadLocalLearningRecord(getActivePlayerKey(initialPlayerName)))
@@ -360,7 +364,7 @@ function App() {
           <p className="eyebrow">\u4eba\u6559\u7248\u6570\u5b66 3-6 \u5e74\u7ea7\u77e5\u8bc6\u70b9\u5de5\u5177</p>
           <h1>\u5148\u505a\u6210\u4f53\u7cfb\uff0c\u518d\u9010\u6b65\u6269\u5230\u5168\u5b66\u6bb5</h1>
           <p className="hero-copy">
-            \u5f53\u524d\u662f\u9996\u7248 MVP\uff1a\u4e09\u5e74\u7ea7\u4e0a\u518c\u30012 \u4e2a\u5355\u5143\u3001\u77e5\u8bc6\u70b9\u7ec3\u4e60\u3001\u5355\u5143\u95ef\u5173\u3001\u9519\u9898\u590d\u4e60\u548c Firebase \u4e91\u540c\u6b65\u3002
+            当前已覆盖 3-6 年级共 8 个学期、32 个单元，支持知识点总结、分层练习、错题复习和 Firebase 云同步，后续继续补充更多题目与总复习内容。
           </p>
         </div>
 
